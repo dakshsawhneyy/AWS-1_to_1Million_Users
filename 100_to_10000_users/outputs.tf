@@ -3,14 +3,19 @@ output "vpc_id" {
   value = module.vpc.vpc_id
 }
 
-output "ec2_id" {
-  description = "Output for EC2 ID"
-  value = module.ec2_instance.id
+output "load_balancer_ip" {
+  description = "The public URL for the application load balancer."
+  value = "https://${aws_lb.my_lb.dns_name}"
+}
+
+output "autoscaling_group_name" {
+  description = "The name of the Auto Scaling Group."
+  value       = aws_autoscaling_group.my_asg.name
 }
 
 output "web_sg_id" {
   description = "Output for my Web Security Group"
-  value = aws_security_group.my_sg.id
+  value = aws_security_group.web_sg.id
 }
 
 output "db_security_group_id" {

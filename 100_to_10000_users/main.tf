@@ -70,33 +70,6 @@ resource "aws_security_group" "web_sg" {
 
   tags = local.common_tags
 }
-
-# =============================================================================
-# EC2 CONFIGURATION
-# =============================================================================
-module "ec2_instance" {
-  source  = "terraform-aws-modules/ec2-instance/aws"
-
-  name = "${var.project_name}-ec2"
-
-  ami = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  key_name      = "general-key-pair"
-  subnet_id     = module.vpc.public_subnets[0]
-
-  # Attach web security group to ssh into web_server
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
-
-  # Attaching user_data with EC2 -- my script acts as configuration management
-  # Converting into tpl file, so we can pass env while calling the file
-  user_data = templatefile("${path.module}/user-data.sh", {
-    service_a_imageurl = "dakshsawhneyy/demo-service-a:latest"
-    service_b_imageurl = "dakshsawhneyy/demo-service-b:latest"
-  })
-
-  tags = local.common_tags
-}
-
 resource "aws_security_group" "db_sg" {
   name = "${var.project_name}-db_sg"
   description = "Allows PostGres Traffic only from web server"
@@ -115,13 +88,90 @@ resource "aws_security_group" "db_sg" {
   tags = local.common_tags
 }
 
+
+# =============================================================================
+# EC2 with Auto-Scaling Group and Elastic Load Balancer CONFIGURATION
+# =============================================================================
+resource "aws_launch_template" "my_launch_template" {
+  name_prefix = "aws-100to10000-"     # generate a unique name everytime
+  image_id = data.aws_ami.ubuntu.id
+  instance_type = "t2.micro"
+  key_name      = "general-key-pair" 
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  user_data = templatefile("${path.module}/user-data.sh", {
+    service_a_imageurl = "dakshsawhneyy/demo-service-a:latest"
+    service_b_imageurl = "dakshsawhneyy/demo-service-b:latest"
+    db_host = module.db.db_instance_address
+  })
+
+  tags = local.common_tags
+}
+
+### Load Balancer
+resource "aws_lb" "my_lb" {
+  name = "${var.project_name}-lb"
+  internal = false    # LB is internet-facing
+  load_balancer_type = "application"
+  security_groups = [aws_security_group.web_sg.id]
+  subnets = module.vpc.public_subnets
+
+  tags = local.common_tags
+}
+# Where to send the load
+resource "aws_lb_target_group" "my_tg" {
+  name = "${var.project_name}-tg"
+  port = 9000   # Routes load to 9000 port -- Service A
+  protocol = "HTTP"
+  vpc_id = module.vpc.vpc_id
+
+  health_check {
+    path = "/healthy"     # /healthy route is created in service A
+  }
+
+  tags = local.common_tags
+}
+# When and how to send the load
+resource "aws_lb_listener" "my_listener" {
+  load_balancer_arn = aws_lb.my_lb.arn
+  port = "80"
+  protocol = "HTTP"
+
+  # Specifies what to do with the request
+  default_action {
+    type = "forward"    # forwards the request
+    target_group_arn = aws_lb_target_group.my_tg.arn   # forwards to the target groups
+  }
+}
+
+### Create auto-scaling group that creates and manages the instance
+resource "aws_autoscaling_group" "my_asg" {
+  name = "100to10000asg"
+  min_size = 2
+  max_size = 4
+  desired_capacity    = 2
+  vpc_zone_identifier = module.vpc.public_subnets
+
+  launch_template {
+    id = aws_launch_template.my_launch_template.id
+    version = "$Latest"
+  }
+
+  # This links the ASG to the Load Balancer's Target Group -- required for instances health checks
+  target_group_arns = [aws_lb_target_group.my_tg.arn]
+
+  # This helps the ASG replace unhealthy instances
+  health_check_type = "ELB"   # Let load balancer check instance health
+  health_check_grace_period = 300
+}
+
 # =============================================================================
 # RDS CONFIGURATION
 # =============================================================================
 module "db" {
   source = "terraform-aws-modules/rds/aws"
 
-  identifier = "100-to-10000-users"
+  identifier = "aws-100to10000-users"
 
   engine            = "postgres"
   engine_version    = "15.7"
@@ -129,7 +179,7 @@ module "db" {
   instance_class    = "db.t4g.micro"
   allocated_storage = 10
 
-  db_name  = "100To10000Users"
+  db_name  = "aws-100To10000Users"
   username = "dakshsawhneyy"
   port     = "5432"
 
