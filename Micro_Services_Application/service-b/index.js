@@ -55,6 +55,13 @@ app.get('/metrics', async(req,res) => {
     res.end(metrics);
 })
 
+app.get('/healthy', (req, res) => {
+    res.status(200).json({
+        name: "👀 - Obserability 🔥- Daksh Sawhney",
+        status: "healthy"
+    })
+});
+
 app.listen(PORT, () => {
     console.log(`Service B is running on port: ${PORT}`);
 })

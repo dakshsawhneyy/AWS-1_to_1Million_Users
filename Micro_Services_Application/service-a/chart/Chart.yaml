@@ -1,0 +1,10 @@
+apiVersion: v2
+name: svc-a
+description: >-
+  A Helm chart for the service-a for my microservices application
+type: application
+version: 1.2.2
+dependencies:
+  - name: svc-b
+    version: "1.2.2"
+    repository: "file://../../service-b/chart"

@@ -1,0 +1,6 @@
+dependencies:
+- name: svc-b
+  repository: file://../../service-b/chart
+  version: 1.2.2
+digest: sha256:15c5306884a66876211350f9635c8203a20660f8e074a72321a92891211e2965
+generated: "2025-10-04T07:03:06.751686633Z"
