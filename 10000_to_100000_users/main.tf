@@ -66,8 +66,8 @@ module "eks" {
       min_size       = 1
       max_size       = 3
       desired_size   = 2
+      vpc_security_group_ids = [aws_security_group.web_sg.id]
     }
-    vpc_security_group_ids = [aws_security_group.web_sg.id]
   }
 
   # Network configuration
