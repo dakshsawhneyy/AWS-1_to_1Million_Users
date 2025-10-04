@@ -59,3 +59,42 @@ output "public_subnets" {
   description = "List of IDs of public subnets"
   value       = module.vpc.public_subnets
 }
+
+# =============================================================================
+# ACCESS INFORMATION
+# =============================================================================
+
+output "configure_kubectl" {
+  description = "Configure kubectl: make sure you're logged in with the correct AWS profile and run the following command to update your kubeconfig"
+  value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${module.eks.cluster_name}"
+}
+
+output "argocd_namespace" {
+  description = "Namespace where ArgoCD is installed"
+  value       = var.argocd_namespace
+}
+
+output "argocd_server_port_forward" {
+  description = "Command to port-forward to ArgoCD server"
+  value       = "kubectl port-forward svc/argocd-server -n ${var.argocd_namespace} 8080:443"
+}
+
+output "argocd_admin_password" {
+  description = "Command to get ArgoCD admin password"
+  value       = "kubectl -n ${var.argocd_namespace} get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
+  sensitive   = true
+}
+
+# =============================================================================
+# APPLICATION ACCESS
+# =============================================================================
+
+output "ingress_nginx_loadbalancer" {
+  description = "Command to get the LoadBalancer URL for accessing applications"
+  value       = "kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'"
+}
+
+output "microservices_app_url" {
+  description = "Command to get the retail store application URL"
+  value       = "echo 'http://'$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+}
