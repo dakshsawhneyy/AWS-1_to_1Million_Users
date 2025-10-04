@@ -16,6 +16,7 @@ resource "helm_release" "cert_manager" {
     }
   ]
 
+  depends_on = [ module.eks ]
 }
 
 resource "helm_release" "ingress_nginx" {
