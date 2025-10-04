@@ -67,6 +67,7 @@ module "eks" {
       max_size       = 3
       desired_size   = 2
     }
+    vpc_security_group_ids = [aws_security_group.web_sg.id]
   }
 
   # Network configuration
@@ -82,4 +83,40 @@ module "eks" {
   cluster_enabled_log_types = []
 
   tags = local.common_tags
+}
+
+# =============================================================================
+# RDS CONFIGURATION
+# =============================================================================
+module "db" {
+  source = "terraform-aws-modules/rds/aws"
+
+  identifier = "awsscalabilitytest"
+
+  engine            = "postgres"
+  engine_version    = "15.7"
+  major_engine_version = "15"
+  instance_class    = "db.t4g.micro"
+  allocated_storage = 10
+
+  db_name  = "awsscalabilitytest"
+  username = "dakshsawhneyy"
+  password = "dakshsuperstar"
+  port     = "5432"
+
+  iam_database_authentication_enabled = true
+
+  vpc_security_group_ids = [aws_security_group.db_sg.id]
+
+  tags = local.common_tags
+
+  # AWS will automatically create a standby replica of your database in a different Availability Zone
+  multi_az = true
+
+  # DB subnet group
+  create_db_subnet_group = true
+  subnet_ids             = module.vpc.private_subnets
+
+  # DB parameter group
+  family = "postgres15"
 }
