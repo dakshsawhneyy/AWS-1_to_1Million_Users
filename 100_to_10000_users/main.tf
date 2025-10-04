@@ -67,6 +67,12 @@ resource "aws_security_group" "web_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   tags = local.common_tags
 }
@@ -99,11 +105,14 @@ resource "aws_launch_template" "my_launch_template" {
   key_name      = "general-key-pair" 
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
-  user_data = templatefile("${path.module}/user-data.sh", {
+  user_data = base64encode(templatefile("${path.module}/user-data.sh", {
     service_a_imageurl = "dakshsawhneyy/demo-service-a:latest"
     service_b_imageurl = "dakshsawhneyy/demo-service-b:latest"
-    db_host = module.db.db_instance_address
-  })
+    db_host    = module.db.db_instance_address
+    db_user    = "dakshsawhneyy"
+    db_pass    = "mySuperSecretPassword123"
+    db_name    = "awsscalabilitytest"
+  }))
 
   tags = local.common_tags
 }
@@ -171,7 +180,7 @@ resource "aws_autoscaling_group" "my_asg" {
 module "db" {
   source = "terraform-aws-modules/rds/aws"
 
-  identifier = "aws-100to10000-users"
+  identifier = "awsscalabilitytest"
 
   engine            = "postgres"
   engine_version    = "15.7"
@@ -179,8 +188,9 @@ module "db" {
   instance_class    = "db.t4g.micro"
   allocated_storage = 10
 
-  db_name  = "aws-100To10000Users"
+  db_name  = "awsscalabilitytest"
   username = "dakshsawhneyy"
+  password = "dakshsuperstar"
   port     = "5432"
 
   iam_database_authentication_enabled = true
