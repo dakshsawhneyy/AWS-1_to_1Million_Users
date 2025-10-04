@@ -1,46 +1,69 @@
 # =============================================================================
-# SECURITY GROUPS AND RULES
+# Security Groups CONFIGURATION
 # =============================================================================
+resource "aws_security_group" "web_sg" {
+  name = "${var.project_name}-web_sg"
+  description = "Allows SSH and HTTP traffic"
+  vpc_id = module.vpc.vpc_id
 
-# Allow HTTP/HTTPS traffic from internet to load balancer
-resource "aws_security_group_rule" "internet_to_lb_http" {
-  description       = "Allow HTTP traffic from internet to LoadBalancer"
-  type              = "ingress"
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = module.eks.cluster_security_group_id
+   # Rule 1: Allow SSH traffic from your IP address
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]    
+  } 
+  # Rule 2: Allow HTTP traffic from anywhere on the internet
+  ingress {
+    from_port   = 80
+    to_port     =  80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # This is the universal code for "anywhere"
+  }
+  # Rule 3: Allow HTTPS traffic from anywhere on the internet
+  ingress {
+    from_port   = 443
+    to_port     =  443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # This is the universal code for "anywhere"
+  }
+
+  # New Rules for our services
+  ingress {
+    from_port   = 9000
+    to_port     =  9000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 9001
+    to_port     =  9001
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = local.common_tags
 }
+resource "aws_security_group" "db_sg" {
+  name = "${var.project_name}-db_sg"
+  description = "Allows PostGres Traffic only from web server"
+  vpc_id = module.vpc.vpc_id
 
-resource "aws_security_group_rule" "internet_to_lb_https" {
-  description       = "Allow HTTPS traffic from internet to LoadBalancer"
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = module.eks.cluster_security_group_id
-}
+  # Rule: Allow PostGres Traffic from our webserver security group
+  ingress {
+    from_port = 5432
+    to_port = 5432
+    protocol = "tcp"
+    
+    # Instead of CIDR Blocks, we do this
+    security_groups = [aws_security_group.web_sg.id]
+  }
 
-# Allow LoadBalancer health checks from AWS
-resource "aws_security_group_rule" "health_checks_to_lb" {
-  description       = "Allow AWS health checks to LoadBalancer"
-  type              = "ingress"
-  from_port         = 10254
-  to_port           = 10254
-  protocol          = "tcp"
-  cidr_blocks       = [module.vpc.vpc_cidr_block]
-  security_group_id = module.eks.cluster_security_group_id
-}
-
-# Allow NodePort range for services (if needed)
-resource "aws_security_group_rule" "nodeport_access" {
-  description       = "Allow NodePort access within VPC"
-  type              = "ingress"
-  from_port         = 30000
-  to_port           = 32767
-  protocol          = "tcp"
-  cidr_blocks       = [module.vpc.vpc_cidr_block]
-  security_group_id = module.eks.cluster_security_group_id
+  tags = local.common_tags
 }

@@ -98,3 +98,11 @@ output "microservices_app_url" {
   description = "Command to get the retail store application URL"
   value       = "echo 'http://'$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
 }
+
+### CDN
+# This output will give you the public URL for your new CDN
+output "cdn_url" {
+  description = "The public domain name of the CloudFront distribution."
+  value       = aws_cloudfront_distribution.my_cdn.domain_name
+}
+

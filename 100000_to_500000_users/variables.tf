@@ -1,11 +1,11 @@
 variable "cluster_name" {
   description = "This project is for 10000 to 100000 AWS users"
-  default = "10000to100000users"
+  default = "100000_to_500000_users"
   type = string
 }
 variable "project_name" {
   description = "This project is for 10000 to 100000 AWS users"
-  default = "10000to100000users"
+  default = "100000_to_500000_users"
   type = string
 }
 
