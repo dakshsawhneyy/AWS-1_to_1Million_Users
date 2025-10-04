@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: retail-store
+  name: microservices-project
   namespace: argocd
 spec:
-  description: Retail Store Sample Application
+  description: A Micro Services Application trying to scale for 10000 to 100000 users
   
   sourceRepos:
-    - 'https://github.com/LondheShubham153/retail-store-sample-app'
+    - 'https://github.com/dakshsawhneyy/AWS-1_to_1Million_Users.git'
   
   destinations:
-    - namespace: retail-store
+    - namespace: app
       server: https://kubernetes.default.svc
   
   clusterResourceWhitelist:

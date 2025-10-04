@@ -1,22 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: retail-store-checkout
+  name: service-a
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  project: retail-store
+  project: microservices-project
   source:
-    repoURL: https://github.com/LondheShubham153/retail-store-sample-app
+    repoURL: https://github.com/dakshsawhneyy/AWS-1_to_1Million_Users.git
     targetRevision: main
-    path: src/checkout/chart
+    path: Micro_Services_Application/service-b/chart
     helm:
       valueFiles:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: retail-store
+    namespace: app
   syncPolicy:
     automated:
       prune: true
