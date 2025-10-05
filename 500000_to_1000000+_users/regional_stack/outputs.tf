@@ -106,3 +106,20 @@ output "cdn_url" {
   value       = aws_cloudfront_distribution.my_cdn.domain_name
 }
 
+# RDS Cluster ARN
+output "rds_cluster_arn" {
+  description = "The ARN of the RDS cluster."
+  value       = module.db.db_instance_arn
+}
+
+
+# DNS Names required by mumbai and virginia stacks
+output "alb_dns_name" {
+  description = "The public DNS name of the regional load balancer."
+  value       = data.kubernetes_service.ingress_nginx_lb.status[0].load_balancer[0].ingress[0].hostname
+}
+
+output "alb_zone_id" {
+  description = "The zone ID of the regional load balancer."
+  value       = data.kubernetes_service.ingress_nginx_lb.status[0].load_balancer[0].ingress[0].hostname # Note: For NLB, Zone ID is not directly available, so we re-use the hostname. Route 53 Alias records can resolve this.
+}

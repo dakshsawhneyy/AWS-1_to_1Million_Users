@@ -93,6 +93,9 @@ module "db" {
 
   identifier = "awsscalabilitytest"
 
+  # DB Replication
+  replicate_source_db = var.replicate_source_db_arn     # Add value in route53 stack
+
   engine            = "postgres"
   engine_version    = "15.7"
   major_engine_version = "15"

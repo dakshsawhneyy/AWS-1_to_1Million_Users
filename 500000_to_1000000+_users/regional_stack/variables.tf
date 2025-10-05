@@ -11,12 +11,12 @@ variable "project_name" {
 
 variable "vpc_cidr" {
   description = "This provides the cidr block for vpc"
-  default = "10.0.0.0/16"
+  #default = "10.0.0.0/16"
   type = string
 }
 
 variable "environment" {
-  default = "dev"
+  #default = "dev"
   type = string
 }
 
@@ -34,7 +34,7 @@ variable "kubernetes_version" {
 variable "aws_region" {
   description = "AWS region where resources will be created"
   type        = string
-  default     = "ap-south-1"
+  #default     = "ap-south-1"
 }
 
 variable "argocd_namespace" {
@@ -47,4 +47,16 @@ variable "argocd_chart_version" {
   description = "ArgoCD Helm chart version"
   type        = string
   default     = "5.51.6"
+}
+
+# variable "replication_group_id" {
+#   description = "The unique ID for the Redis replication group"
+#   type        = string
+#   default     = "redis-cluster"
+# }
+
+variable "replicate_source_db_arn" {
+  description = "The ARN of the source DB to replicate from."
+  type        = string
+  default     = null # This makes it optional
 }
