@@ -1,3 +1,8 @@
+resource "time_sleep" "wait_for_cluster_ready" {
+  create_duration = "300s"
+  depends_on = [module.eks.cluster_id]
+}
+
 resource "helm_release" "cert_manager" {
   # This tells Terraform to use the aliased provider we created
   provider = helm.eks_cluster
@@ -16,7 +21,9 @@ resource "helm_release" "cert_manager" {
     }
   ]
 
-  depends_on = [ module.eks ]
+  timeout = 1200 # Wait up to 600 seconds (10 minutes)
+
+  depends_on = [time_sleep.wait_for_cluster_ready]
 }
 
 resource "helm_release" "ingress_nginx" {
@@ -55,31 +62,9 @@ resource "helm_release" "ingress_nginx" {
         name  = "controller.resources.limits.memory"
         value = "256Mi"
     },
-    {
-        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-scheme"
-        value = "internet-facing"
-      },
-      {
-        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
-        value = "nlb"
-      },
-      {
-        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-nlb-target-type"
-        value = "instance"
-      },
-      {
-        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-health-check-path"
-        value = "/healthy"
-      },
-      {
-        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-health-check-port"
-        value = "10254"
-      },
-      {
-        name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-health-check-protocol"
-        value = "HTTP"
-      }
   ]
 
-  depends_on = [ module.eks ]
+  timeout = 1200 # Wait up to 600 seconds (10 minutes)
+
+  depends_on = [time_sleep.wait_for_cluster_ready]
 }

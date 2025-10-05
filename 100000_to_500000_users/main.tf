@@ -60,13 +60,34 @@ module "eks" {
   #   node_pools = ["general-purpose"]
   # }
 
+  cluster_security_group_additional_rules = {
+    ingress_from_web_sg = {
+      description = "Allow all traffic from the web SG"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      source_security_group_id = aws_security_group.web_sg.id
+    }
+  }
+
   eks_managed_node_groups = {
     general = {
       instance_types = ["t2.micro"]
       min_size       = 1
       max_size       = 3
       desired_size   = 2
-      vpc_security_group_ids = [aws_security_group.web_sg.id]
+    }
+  }
+
+  node_security_group_additional_rules = {
+    ingress_self_all = {
+      description = "Node to node all traffic"
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      self        = true # This is the key part
     }
   }
 
@@ -91,7 +112,7 @@ module "eks" {
 module "db" {
   source = "terraform-aws-modules/rds/aws"
 
-  identifier = "awsscalabilitytest"
+  identifier = "awsscalabilitytestee"
 
   engine            = "postgres"
   engine_version    = "15.7"
@@ -99,7 +120,7 @@ module "db" {
   instance_class    = "db.t4g.micro"
   allocated_storage = 10
 
-  db_name  = "awsscalabilitytest"
+  db_name  = "awsscalabilitytestee"
   username = "dakshsawhneyy"
   password = "dakshsuperstar"
   port     = "5432"
