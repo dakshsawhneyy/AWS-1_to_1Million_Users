@@ -62,7 +62,7 @@ module "eks" {
 
   eks_managed_node_groups = {
     general = {
-      instance_types = ["t2.micro"]
+      instance_types = ["t3.medium"]
       min_size       = 1
       max_size       = 3
       desired_size   = 2
@@ -91,7 +91,7 @@ module "eks" {
 module "db" {
   source = "terraform-aws-modules/rds/aws"
 
-  identifier = "awsscalabilitytest"
+  identifier = "awsscalabilitytesttt"
 
   engine            = "postgres"
   engine_version    = "15.7"
@@ -99,7 +99,7 @@ module "db" {
   instance_class    = "db.t4g.micro"
   allocated_storage = 10
 
-  db_name  = "awsscalabilitytest"
+  db_name  = "awsscalabilitytesttt"
   username = "dakshsawhneyy"
   password = "dakshsuperstar"
   port     = "5432"

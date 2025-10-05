@@ -34,7 +34,7 @@ module "elasticache" {
 
   replication_group_id = "redis-elasticache"
 
-  cluster_id           = "${var.project_name}-redis"
+  cluster_id           = "hello-redis"
   engine = "redis"
   engine_version = "7.1"
   node_type      = "cache.t3.micro"
