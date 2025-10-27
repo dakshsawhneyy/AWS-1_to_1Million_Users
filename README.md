@@ -14,8 +14,7 @@ This diagram illustrates the complete architectural evolution of the platform, f
 ## The Architectural Journey
 
 This platform was not built in a day. It was built **iteratively**, with each new phase engineered to solve the critical bottlenecks of the previous one.
-<img width="1683" height="1009" alt="diagram-export-10-5-2025-9_37_20-PM" src="https://github.com/user-attachments/assets/011fcdad-b3da-429b-a112-7eb2511a719b" />
-
+<img width="1906" height="874" alt="diagram-export-10-5-2025-10_01_38-PM" src="https://github.com/user-attachments/assets/6b8a2e61-95ef-4312-8b26-a86a78cfc05c" />
 
 ### Phase 0: The MVP (1-100 Users)
 
@@ -64,8 +63,7 @@ This is the final, globally distributed platform. I refactored the entire region
 
 **The Result:**  
 **AWS Route 53** with latency-based routing now sits in front of both regional deployments, automatically directing users to the closest, fastest region. The RDS database is configured with **cross-region read replication**, providing fast, local database reads for global users. The system can now survive a complete regional outage.
-<img width="1906" height="874" alt="diagram-export-10-5-2025-10_01_38-PM" src="https://github.com/user-attachments/assets/6b8a2e61-95ef-4312-8b26-a86a78cfc05c" />
-
+<img width="1683" height="1009" alt="diagram-export-10-5-2025-9_37_20-PM" src="https://github.com/user-attachments/assets/011fcdad-b3da-429b-a112-7eb2511a719b" />
 
 ---
 
